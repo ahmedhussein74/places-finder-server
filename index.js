@@ -44,6 +44,23 @@ app.get("/places", async (req, res) => {
   }
 });
 
+app.get("/places/:id", async (req, res) => {
+  try {
+    const key = process.env.API_KEY;
+    const placeId = req.params.id;
+    const baseUrl = "https://maps.googleapis.com/maps/api/place/details/json";
+    const params = {
+      placeid: placeId,
+      key: key,
+    };
+    const response = await axios.get(baseUrl, { params });
+    res.send(response.data);
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).send("Error occurred while fetching place details.");
+  }
+});
+
 //run the application
 app.listen(process.env.PORT, () => {
   console.log(`Server listining on port: ${process.env.PORT}`);
