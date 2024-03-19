@@ -16,26 +16,22 @@ exports.getStates = async (req, res) => {
 };
 
 exports.getCities = async (req, res) => {
-  const { iso2, sc } = req.query;
+  const { iso2, sc } = req.params;
   try {
     const country = world.find((country) => country.iso2 === iso2);
     if (!country) {
-      console.log("Country not found");
       return res.status(404).json({ error: "Country not found" });
     }
     const state = country.states.find((state) => state.sc === sc);
     if (!state) {
-      console.log("State not found");
       return res.status(404).json({ error: "State not found" });
     }
-    console.log("State found:", state);
     return res.status(200).json({ cities: state.cities });
   } catch (error) {
     console.error("Error while fetching cities:", error);
     return res.status(500).json({ error: "Internal Server Error" });
   }
 };
-
 
 exports.getPlaces = async (req, res) => {
   const { country, city, category } = req.query;
