@@ -1,10 +1,10 @@
 require("dotenv").config();
 const cors = require("cors");
-const axios = require("axios");
 const morgan = require("morgan");
 const helmet = require("helmet");
 const express = require("express");
 const bodyParser = require("body-parser");
+const PlacetRoute = require("./routes/PlacesRoute");
 
 // create express app
 const app = express();
@@ -16,50 +16,8 @@ app.use(express.json());
 app.use(morgan("combined"));
 app.use(bodyParser.urlencoded({ extended: true }));
 
-app.get("/places", async (req, res) => {
-  const { country, city, category } = req.query;
-  const query = `${category} in ${city},${country}`;
-  const key = process.env.API_KEY;
-  const baseUrl = "https://maps.googleapis.com/maps/api/place/textsearch/json";
-  const params = {
-    query,
-    key,
-  };
-
-  try {
-    let results = [];
-    let nextPageToken = null;
-    do {
-      const res = await axios.get(baseUrl, { params });
-      results.push(...res.data.results);
-      nextPageToken = res.data.next_page_token;
-      params.pagetoken = nextPageToken;
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-    } while (nextPageToken);
-    res.status(200).json(results);
-  } catch (error) {
-    res
-      .status(500)
-      .json({ error: "Failed to fetch data from Google Places API" });
-  }
-});
-
-app.get("/places/:id", async (req, res) => {
-  try {
-    const key = process.env.API_KEY;
-    const placeId = req.params.id;
-    const baseUrl = "https://maps.googleapis.com/maps/api/place/details/json";
-    const params = {
-      placeid: placeId,
-      key: key,
-    };
-    const response = await axios.get(baseUrl, { params });
-    res.send(response.data);
-  } catch (error) {
-    console.log(error.message);
-    res.status(500).send("Error occurred while fetching place details.");
-  }
-});
+// Routes
+app.use("/api/places", PlacetRoute);
 
 //run the application
 app.listen(process.env.PORT, () => {
