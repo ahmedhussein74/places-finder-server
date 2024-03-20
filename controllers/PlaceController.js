@@ -34,8 +34,8 @@ exports.getCities = async (req, res) => {
 };
 
 exports.getPlaces = async (req, res) => {
-  const { country, city, category } = req.query;
-  const query = `${category} in ${city},${country}`;
+  const { country, government, city, category } = req.query;
+  const query = `${category} in ${government} ${city},${country}`;
   const key = process.env.API_KEY;
   const baseUrl = "https://maps.googleapis.com/maps/api/place/textsearch/json";
   const params = {
