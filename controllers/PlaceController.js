@@ -1,7 +1,7 @@
 const axios = require("axios");
 const world = require("../database/world");
 
-exports.getStates = async (req, res) => {
+exports.getGovernments = async (req, res) => {
   const code = req.params.iso2;
   try {
     const filteredCountries = world.filter((element) => element.iso2 === code);

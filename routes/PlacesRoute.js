@@ -6,7 +6,7 @@ router.get("/", place.getPlaces);
 
 router.get("/:id", place.getPlaceDetails);
 
-router.get("/states/:iso2", place.getStates);
+router.get("/governments/:iso2", place.getGovernments);
 
 router.get("/cities/:iso2/:sc", place.getCities);
 
