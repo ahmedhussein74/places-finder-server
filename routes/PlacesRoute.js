@@ -6,8 +6,6 @@ router.get("/", place.getPlaces);
 
 router.get("/:id", place.getPlaceDetails);
 
-router.get("/governments/:iso2", place.getGovernments);
-
-router.get("/cities/:iso2/:sc", place.getCities);
+router.get("/cities/:countryCode/:adminCode1", place.getCities);
 
 module.exports = router;

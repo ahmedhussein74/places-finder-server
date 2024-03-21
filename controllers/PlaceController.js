@@ -1,48 +1,34 @@
 const axios = require("axios");
-const world = require("../database/world");
-
-exports.getGovernments = async (req, res) => {
-  const code = req.params.iso2;
-  try {
-    const filteredCountries = world.filter((element) => element.iso2 === code);
-    if (filteredCountries.length === 0) {
-      return res.status(404).json({ error: "Country not found" });
-    }
-    return res.status(200).json({ states: filteredCountries[0].states });
-  } catch (error) {
-    console.error("Error while fetching cities:", error);
-    return res.status(500).json({ error: "Internal Server Error" });
-  }
-};
+const { cleanData } = require("../middlewares/cleaningData");
 
 exports.getCities = async (req, res) => {
-  const { iso2, sc } = req.params;
   try {
-    const country = world.find((country) => country.iso2 === iso2);
-    if (!country) {
-      return res.status(404).json({ error: "Country not found" });
+    const { countryCode, adminCode1 } = req.params;
+    const baseUrl = "http://api.geonames.org/searchJSON";
+    const username = "taweeq";
+    const response = await axios.get(
+      `${baseUrl}?username=${username}&style=short&maxRows=1000&featureClass=A&featureClass=P&country=${countryCode}&adminCode1=${adminCode1}`
+    );
+    if (response.data.geonames && response.data.geonames.length > 0) {
+      let cities = response.data.geonames.map((city) => city.name);
+      cities = await cleanData(cities);
+      console.log(cities.length);
+      res.status(200).json(cities);
     }
-    const state = country.states.find((state) => state.sc === sc);
-    if (!state) {
-      return res.status(404).json({ error: "State not found" });
-    }
-    return res.status(200).json({ cities: state.cities });
   } catch (error) {
-    console.error("Error while fetching cities:", error);
-    return res.status(500).json({ error: "Internal Server Error" });
+    res.status(500).json(error.message);
   }
 };
 
 exports.getPlaces = async (req, res) => {
-  const { country, government, city, category } = req.query;
-  const query = `${category} in ${government} ${city},${country}`;
+  const { country, city, category } = req.query;
+  const query = `${category} in ${city},${country}`;
   const key = process.env.API_KEY;
   const baseUrl = "https://maps.googleapis.com/maps/api/place/textsearch/json";
   const params = {
     query,
     key,
   };
-
   try {
     let results = [];
     let nextPageToken = null;
