@@ -21,8 +21,7 @@ exports.getCities = async (req, res) => {
       res.status(404).json({ message: "No cities found." });
     }
   } catch (error) {
-    console.error("Error:", error);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(500).json(error.message);
   }
 };
 
