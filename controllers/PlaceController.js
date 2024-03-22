@@ -3,20 +3,26 @@ const { cleanData } = require("../middlewares/cleaningData");
 
 exports.getCities = async (req, res) => {
   try {
-    const { countryCode, adminCode1 } = req.params;
+    const { countryCode } = req.params;
     const baseUrl = "http://api.geonames.org/searchJSON";
-    const username = "taweeq";
-    const response = await axios.get(
-      `${baseUrl}?username=${username}&style=short&maxRows=1000&featureClass=A&featureClass=P&country=${countryCode}&adminCode1=${adminCode1}`
-    );
-    if (response.data.geonames && response.data.geonames.length > 0) {
-      let cities = response.data.geonames.map((city) => city.name);
-      cities = await cleanData(cities);
-      console.log(cities.length);
-      res.status(200).json(cities);
+    const response = await axios.get(baseUrl, {
+      params: {
+        country: countryCode,
+        maxRows: 1000,
+        username: "taweeq",
+      },
+    });
+    const data = response.data;
+    if (data.geonames && data.geonames.length > 0) {
+      const cities = data.geonames.map((city) => city.name);
+      const cleanedCities = await cleanData(cities);
+      res.status(200).json(cleanedCities);
+    } else {
+      res.status(404).json({ message: "No cities found." });
     }
   } catch (error) {
-    res.status(500).json(error.message);
+    console.error("Error:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 };
 
@@ -41,9 +47,7 @@ exports.getPlaces = async (req, res) => {
     } while (nextPageToken);
     res.status(200).json(results);
   } catch (error) {
-    res
-      .status(500)
-      .json({ error: "Failed to fetch data from Google Places API" });
+    res.status(500).json(error.message);
   }
 };
 
